@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SoftwareIdentity
+    xmlns="http://standards.iso.org/iso/19770/-2/2015/schema.xsd"
+    xmlns:discovery="http://packagemanagement.org/discovery"
+    
+    name="EXE Provider for PackageManagement"
+    versionScheme="multipartnumeric"
+    media="(windows) and (PackageManagement) and (min-PackageManagement.api:2) NOT (windows-nano)"
+    tagVersion="1"
+    
+    version='1.0.0.0'
+    uniqueId='exe.1.0.0.0'
+>
+
+  <Meta
+      providerName="exe"
+      providerversion='1.0.0.0'
+      summary="EXE provider for the OneGet meta-package manager"
+  />
+</SoftwareIdentity>
