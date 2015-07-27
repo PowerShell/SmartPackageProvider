@@ -23,7 +23,7 @@ namespace SmartProvider
         /// </summary>
         protected static Dictionary<string, string[]> Features = new Dictionary<string, string[]> {
             {Constants.Features.SupportedSchemes, new[] {"http", "https", "file"}},
-            {Constants.Features.SupportedExtensions, new[] {"nupkg"}},
+            {Constants.Features.SupportedExtensions, new[] {"smart"}},
             {Constants.Features.MagicSignatures, new[] {Constants.Signatures.Zip}},
         };
 
