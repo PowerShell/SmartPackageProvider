@@ -62,8 +62,6 @@ namespace OneGet.Sdk {
 
             void DeleteFile(string filename, Request requestObject);
 
-            string GetKnownFolder(string knownFolder, Request requestObject);
-
             string CanonicalizePath(string text, string currentDirectory);
 
             bool FileExists(string path);

@@ -46,7 +46,7 @@ namespace ExeProvider
         {
             IDictionary<string, PackageSource> packageSources = GetPackageSources(request);
 
-            if (packageSources.ContainsKey(name))
+            if (!packageSources.ContainsKey(name))
             {
                 request.Error(ErrorCategory.ResourceUnavailable, name, Strings.PackageSourceNotFound, name);
                 return;
@@ -69,7 +69,7 @@ namespace ExeProvider
             if (String.IsNullOrEmpty(filePath))
             {
                 //otherwise, use %APPDATA%/SMART/Smart.Config
-                filePath = Path.Combine(request.ProviderServices.GetKnownFolder("ApplicationData", request), "SMART", "Smart.config");
+                filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SMART", "Smart.config");
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
