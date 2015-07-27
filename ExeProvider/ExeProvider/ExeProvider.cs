@@ -94,25 +94,22 @@ namespace ExeProvider
             switch ((category ?? string.Empty).ToLowerInvariant())
             {
                 case "package":
-                    request.YieldDynamicOption("FilterOnTag", Constants.OptionType.StringArray, false);
-                    request.YieldDynamicOption("Contains", Constants.OptionType.String, false);
-                    request.YieldDynamicOption("AllowPrereleaseVersions", Constants.OptionType.Switch, false);
+                    //request.YieldDynamicOption("FilterOnTag", Constants.OptionType.StringArray, false);
+                    //request.YieldDynamicOption("Contains", Constants.OptionType.String, false);
+                    //request.YieldDynamicOption("AllowPrereleaseVersions", Constants.OptionType.Switch, false);
                     break;
 
                 case "source":
                     request.YieldDynamicOption("ConfigFile", Constants.OptionType.String, false);
-                    request.YieldDynamicOption("SkipValidate", Constants.OptionType.Switch, false);
+                    //request.YieldDynamicOption("SkipValidate", Constants.OptionType.Switch, false);
                     break;
 
                 // applies to Get-Package, Install-Package, Uninstall-Package
                 case "install":
                     request.YieldDynamicOption("Destination", Constants.OptionType.Path, true);
-                    request.YieldDynamicOption("SkipDependencies", Constants.OptionType.Switch, false);
-                    request.YieldDynamicOption("ContinueOnFailure", Constants.OptionType.Switch, false);
-                    request.YieldDynamicOption("ExcludeVersion", Constants.OptionType.Switch, false);
-                    request.YieldDynamicOption("PackageSaveMode", Constants.OptionType.String, false, new[] {
-                        "nuspec", "nupkg", "nuspec;nupkg"
-                    });
+                    //request.YieldDynamicOption("SkipDependencies", Constants.OptionType.Switch, false);
+                    //request.YieldDynamicOption("ContinueOnFailure", Constants.OptionType.Switch, false);
+                    //request.YieldDynamicOption("ExcludeVersion", Constants.OptionType.Switch, false);
                     break;
                 default:
                     request.Debug("Unknown category for '{0}::GetDynamicOptions': {1}", PackageProviderName, category);
@@ -245,7 +242,7 @@ namespace ExeProvider
             }
 
 
-            var packageItem = new PackageItem();
+            var packageItem = new PackageItem(sources.FirstOrDefault(), "notepad", "1.0");
 
             // YieldPackage returns false when operation was cancelled
             if (!request.YieldPackage(packageItem, name))

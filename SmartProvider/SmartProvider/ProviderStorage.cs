@@ -12,7 +12,7 @@ namespace SmartProvider
     internal static class ProviderStorage
     {
         private const string DefaultConfig = @"{
-  ""google.com"": {
+  ""Google"": {
     ""Name"": ""Google"",
     ""Location"": ""https://google.com"",
     ""Trusted"": false,

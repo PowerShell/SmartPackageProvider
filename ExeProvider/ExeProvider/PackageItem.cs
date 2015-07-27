@@ -6,21 +6,30 @@ using System.Threading.Tasks;
 
 namespace ExeProvider
 {
-    class PackageItem
+    internal class PackageItem
     {
-        public string FastPath;
+        internal PackageItem(PackageSource source, string id, string version)
+        {
+            Id = id;
+            Version = version;
+            PackageSource = source;
+
+            FastPath = source.MakeFastPath(id, version);
+        }
+
+        public string FastPath { get; private set; }
+
+        public PackageSource PackageSource { get; private set; }
+
+        public string Id { get; private set; }
+
+        public string Version { get; private set; }
 
         public string Title;
-
-        public string Id;
-
-        public string Version;
 
         public string Summary;
 
         public string Description;
-
-        public PackageSource PackageSource;
 
         public string FullPath;
 
