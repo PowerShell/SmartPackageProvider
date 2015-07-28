@@ -347,8 +347,10 @@ namespace SmartProvider
             }
 
             // TODO: install
-            request.ProviderServices.DownloadFile(new Uri(id), "test", request);
-            request.ProviderServices.Install("test", null, request);
+            var tempLocation = @"c:\users\dagrala\desktop\aaa\test.exe";
+            var tempLocation2 = @"c:\users\dagrala\desktop\aaa\7z920-x64.msi";
+            request.ProviderServices.DownloadFile(new Uri(id), tempLocation, request);
+            request.ProviderServices.Install(tempLocation2, null, request);
         }
 
         /// <summary>
