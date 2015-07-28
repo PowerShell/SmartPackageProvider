@@ -241,13 +241,26 @@ namespace SmartProvider
                 return;
             }
 
-
-            var packageItem = new PackageItem(sources.FirstOrDefault(), "notepad", "1.0");
-
-            // YieldPackage returns false when operation was cancelled
-            if (!request.YieldPackage(packageItem, name))
+            foreach (var source in sources)
             {
-                return;
+                var webSearch = new WebSearch(source);
+                var urls = webSearch.Search(name);
+
+                foreach (var url in urls)
+                {
+                    var downloadLink = DownloadLinkFinder.GetDownloadLink(url);
+
+                    // TODO: check if downloadLink is the same domain as url
+                    // TODO: YieldPackage downloadLink
+
+                    var packageItem = new PackageItem(source, "notepad", "1.0");
+
+                    // YieldPackage returns false when operation was cancelled
+                    if (!request.YieldPackage(packageItem, name))
+                    {
+                        return;
+                    }
+                }
             }
         }
 
