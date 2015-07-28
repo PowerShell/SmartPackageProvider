@@ -35,7 +35,12 @@ namespace SmartProvider
                 {
                     if (null != bestExeLink.Attributes["href"])
                     {
-                        return new Uri(uri, bestExeLink.Attributes["href"].Value);
+                        var cleanLink = HtmlEntity.DeEntitize(bestExeLink.Attributes["href"].Value);
+                        var potentialUrl = new Uri(uri, cleanLink);
+                        if (await CheckPotentialExe(potentialUrl))
+                        {
+                            return potentialUrl;
+                        }
                     }
                     return null;
                 }
@@ -48,10 +53,65 @@ namespace SmartProvider
                 if (bestDownloadNowLink != null)
                 {
                     var redirectLink = new Uri(uri, (null != bestDownloadNowLink.Attributes["href"]) ? bestDownloadNowLink.Attributes["href"].Value : null);
+                    if (await CheckPotentialExe(redirectLink))
+                    {
+                        return redirectLink;
+                    }
+                    else
+                    {
+                        // THIRD, check for meta refresh
+                        response = await httpClient.GetAsync(redirectLink);
+
+                        //will throw an exception if not successful
+                        response.EnsureSuccessStatusCode();
+
+                        content = await response.Content.ReadAsStringAsync();
+
+                        htmlDoc = new HtmlDocument();
+                        htmlDoc.LoadHtml(content);
+
+                        if (htmlDoc.DocumentNode != null)
+                        {
+                            // search for meta refresh
+                            var metaRefresh = htmlDoc.DocumentNode.SelectNodes("//meta[contains(@http-equiv,'refresh')]");
+                            if (metaRefresh != null && metaRefresh.Count > 0 && metaRefresh[0] != null)
+                            {
+                                var cnetMetaRefreshLink = metaRefresh[0].GetAttributeValue("content", null).Substring(6);
+                                var cnetMetaRefreshUri = new Uri(cnetMetaRefreshLink);
+                                if (await CheckPotentialExe(cnetMetaRefreshUri))
+                                {
+                                    return cnetMetaRefreshUri;
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
             return null;
+        }
+
+        private async static Task<bool> CheckPotentialExe(Uri uri)
+        {
+            var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync(uri);
+
+            //will throw an exception if not successful
+            response.EnsureSuccessStatusCode();
+
+            //string content = await response.Content.ReadAsStringAsync();
+
+            IEnumerable<string> values;
+            if (response.Content.Headers.TryGetValues("Content-Type", out values))
+            {
+                var contentType = values.First();
+                if (contentType.Contains("application"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
