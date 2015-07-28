@@ -246,20 +246,23 @@ namespace SmartProvider
                 var webSearch = new WebSearch(source);
                 var urls = webSearch.Search(name);
 
+                List<Uri> downloadLinks = new List<Uri>();
                 foreach (var url in urls)
                 {
-                    var downloadLink = DownloadLinkFinder.GetDownloadLink(url);
+                    var downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
+                    downloadLinks.Add(downloadLink);
+                }
 
-                    // TODO: check if downloadLink is the same domain as url
-                    // TODO: YieldPackage downloadLink
+                // TODO: for now we're picking the first one
+                // TODO: e.g. check if downloadLink is the same domain as url
+                var bestDownloadLink = downloadLinks.FirstOrDefault();
 
-                    var packageItem = new PackageItem(source, "notepad", "1.0");
+                var packageItem = new PackageItem(source, bestDownloadLink.ToString(), "1.0");
 
-                    // YieldPackage returns false when operation was cancelled
-                    if (!request.YieldPackage(packageItem, name))
-                    {
-                        return;
-                    }
+                // YieldPackage returns false when operation was cancelled
+                if (!request.YieldPackage(packageItem, name))
+                {
+                    return;
                 }
             }
         }
@@ -344,6 +347,8 @@ namespace SmartProvider
             }
 
             // TODO: install
+            request.ProviderServices.DownloadFile(new Uri(id), "test", request);
+            request.ProviderServices.Install("test", null, request);
         }
 
         /// <summary>
