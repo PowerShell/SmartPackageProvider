@@ -29,21 +29,25 @@ namespace SmartProvider
                 var exeLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href,'exe')]");
 
                 //TODO: select best exe
-                var bestExeLink = exeLinks?[0];
+                var bestExeLink = (null != exeLinks)?exeLinks[0] : null;
 
                 if (bestExeLink != null)
                 {
-                    return new Uri(uri, bestExeLink.Attributes["href"]?.Value);
+                    if (null != bestExeLink.Attributes["href"])
+                    {
+                        return new Uri(uri, bestExeLink.Attributes["href"].Value);
+                    }
+                    return null;
                 }
 
                 // SECOND, look for "Download Now" button, e.g. download.cnet.com
                 var downloadNowLinks = htmlDoc.DocumentNode.SelectNodes("//a[span = 'Download Now']");
 
-                var bestDownloadNowLink = downloadNowLinks?[0];
+                var bestDownloadNowLink = (null != downloadNowLinks) ? downloadNowLinks[0] : null;
 
                 if (bestDownloadNowLink != null)
                 {
-                    var redirectLink = new Uri(uri, bestDownloadNowLink.Attributes["href"]?.Value);
+                    var redirectLink = new Uri(uri, (null != bestDownloadNowLink.Attributes["href"]) ? bestDownloadNowLink.Attributes["href"].Value : null);
                 }
             }
 
