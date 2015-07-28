@@ -21,10 +21,10 @@ namespace SmartProviderTests
         public void NotepadPlusPlus2()
         {
             string searchResult = @"http://download.cnet.com/Notepad/3000-2352_4-10327521.html";
-            string expected = null;
+            string expected = @"http://download.cnet.com/Notepad/3001-2352_4-10327521.html?hasJs=n&hlndr=1";
 
             var uri = DownloadLinkFinder.GetDownloadLink(new Uri(searchResult)).Result;
-            Assert.AreEqual(expected, uri);
+            Assert.AreEqual(new Uri(expected), uri);
         }
 
         [TestMethod]

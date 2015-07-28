@@ -25,6 +25,7 @@ namespace SmartProvider
 
             if (htmlDoc.DocumentNode != null)
             {
+                // FIRST, try direct EXE links
                 var exeLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href,'exe')]");
 
                 //TODO: select best exe
@@ -34,10 +35,19 @@ namespace SmartProvider
                 {
                     return new Uri(uri, bestExeLink.Attributes["href"]?.Value);
                 }
+
+                // SECOND, look for "Download Now" button, e.g. download.cnet.com
+                var downloadNowLinks = htmlDoc.DocumentNode.SelectNodes("//a[span = 'Download Now']");
+
+                var bestDownloadNowLink = downloadNowLinks?[0];
+
+                if (bestDownloadNowLink != null)
+                {
+                    var redirectLink = new Uri(uri, bestDownloadNowLink.Attributes["href"]?.Value);
+                }
             }
 
             return null;
-            //return new Uri("https://notepad-plus-plus.org/repository/6.x/6.8/npp.6.8.Installer.exe");
         }
     }
 }
