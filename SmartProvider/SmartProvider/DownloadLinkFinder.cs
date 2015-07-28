@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace SmartProvider
 {
-    static class DownloadLinkFinder
+    public static class DownloadLinkFinder
     {
-        internal async static Task<Uri> GetDownloadLink(Uri uri)
+        public async static Task<Uri> GetDownloadLink(Uri uri)
         {
             var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(uri);
