@@ -63,8 +63,6 @@ namespace SmartProvider
 
         public List<Uri> Search(string name)
         {
-            // TODO: get top 3 links to download pages
-            // using google search api/bing search api/website search box
             //return new List<Uri> { new Uri("https://notepad-plus-plus.org/download/"), new Uri("http://download.cnet.com/Notepad/3000-2352_4-10327521.html"), new Uri("http://notepad-plus.en.softonic.com/download"), new Uri("http://filehippo.com/download_notepad/") };
 
             return this.GetUrlIHtml("http://google.com/search?q=" + name + "%20download%20location", "/download", "google");
