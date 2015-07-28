@@ -21,10 +21,10 @@ namespace SmartProviderTests
         public void NotepadPlusPlus2()
         {
             string searchResult = @"http://download.cnet.com/Notepad/3000-2352_4-10327521.html";
-            string expected = @"http://download.cnet.com/Notepad/3001-2352_4-10327521.html?hasJs=n&hlndr=1";
+            string expected = @"http://software-files-a.cnet.com/s/software/14/43/26/20/npp.6.8.Installer.exe";
 
             var uri = DownloadLinkFinder.GetDownloadLink(new Uri(searchResult)).Result;
-            Assert.AreEqual(new Uri(expected), uri);
+            Assert.IsTrue(uri.ToString().Contains(expected));
         }
 
         [TestMethod]
@@ -34,7 +34,7 @@ namespace SmartProviderTests
             string expected = @"npp-6-8-Installer.exe";
 
             var uri = DownloadLinkFinder.GetDownloadLink(new Uri(searchResult)).Result;
-            Assert.IsTrue(uri.AbsolutePath.Contains(expected));
+            Assert.IsTrue(uri.ToString().Contains(expected));
         }
     }
 }

@@ -60,7 +60,7 @@ namespace SmartProvider
                     else
                     {
                         // THIRD, check for meta refresh
-                        response = await httpClient.GetAsync(uri);
+                        response = await httpClient.GetAsync(redirectLink);
 
                         //will throw an exception if not successful
                         response.EnsureSuccessStatusCode();
@@ -76,11 +76,11 @@ namespace SmartProvider
                             var metaRefresh = htmlDoc.DocumentNode.SelectNodes("//meta[contains(@http-equiv,'refresh')]");
                             if (metaRefresh != null && metaRefresh.Count > 0 && metaRefresh[0] != null)
                             {
-                                var metaRefreshLink = metaRefresh[0].GetAttributeValue("url", null);
-                                var metaRefreshUri = new Uri(metaRefreshLink);
-                                if (await CheckPotentialExe(metaRefreshUri))
+                                var cnetMetaRefreshLink = metaRefresh[0].GetAttributeValue("content", null).Substring(6);
+                                var cnetMetaRefreshUri = new Uri(cnetMetaRefreshLink);
+                                if (await CheckPotentialExe(cnetMetaRefreshUri))
                                 {
-                                    return metaRefreshUri;
+                                    return cnetMetaRefreshUri;
                                 }
                             }
                         }
@@ -105,7 +105,7 @@ namespace SmartProvider
             if (response.Content.Headers.TryGetValues("Content-Type", out values))
             {
                 var contentType = values.First();
-                if (contentType == "application/x-msdos-program" || contentType == "application/x-msdownload")
+                if (contentType.Contains("application"))
                 {
                     return true;
                 }
