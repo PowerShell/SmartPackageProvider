@@ -23,21 +23,15 @@ namespace SmartProvider
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(content);
 
-            // ParseErrors is an ArrayList containing any errors from the Load statement
-            if (htmlDoc.ParseErrors != null && htmlDoc.ParseErrors.Count() > 0)
+            if (htmlDoc.DocumentNode != null)
             {
-                // Handle any parse errors as required
-                return null;
-            }
-            else
-            {
-                if (htmlDoc.DocumentNode != null)
+                var exeLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href,'exe')]");
+
+                //TODO: select best exe
+                var bestExeLink = exeLinks?[0];
+
+                if (bestExeLink != null)
                 {
-                    var exeLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href,'exe')]");
-
-                    //TODO: select best exe
-                    var bestExeLink = exeLinks?[0];
-
                     return new Uri(uri, bestExeLink.Attributes["href"]?.Value);
                 }
             }

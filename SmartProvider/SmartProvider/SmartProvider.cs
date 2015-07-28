@@ -250,7 +250,10 @@ namespace SmartProvider
                 foreach (var url in urls)
                 {
                     var downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
-                    downloadLinks.Add(downloadLink);
+                    if (downloadLink != null)
+                    {
+                        downloadLinks.Add(downloadLink);
+                    }
                 }
 
                 // TODO: for now we're picking the first one
