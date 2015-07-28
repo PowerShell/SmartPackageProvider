@@ -35,7 +35,8 @@ namespace SmartProvider
                 {
                     if (null != bestExeLink.Attributes["href"])
                     {
-                        var potentialUrl = new Uri(uri, bestExeLink.Attributes["href"].Value);
+                        var cleanLink = HtmlEntity.DeEntitize(bestExeLink.Attributes["href"].Value);
+                        var potentialUrl = new Uri(uri, cleanLink);
                         if (await CheckPotentialExe(potentialUrl))
                         {
                             return potentialUrl;
@@ -104,7 +105,7 @@ namespace SmartProvider
             if (response.Content.Headers.TryGetValues("Content-Type", out values))
             {
                 var contentType = values.First();
-                if (contentType == "application/x-msdos-program")
+                if (contentType == "application/x-msdos-program" || contentType == "application/x-msdownload")
                 {
                     return true;
                 }
