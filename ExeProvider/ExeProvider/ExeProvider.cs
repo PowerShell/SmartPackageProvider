@@ -322,9 +322,9 @@ namespace ExeProvider
         {
             request.Debug("Calling '{0}::InstallPackage' '{1}'", PackageProviderName, fastPackageReference);
 
-            string source;
-            string id;
-            string version;
+            string source; //ignore
+            string id; //url or file path
+            string version; //
             if (!fastPackageReference.TryParseFastPath(out source, out id, out version))
             {
                 request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
