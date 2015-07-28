@@ -4,10 +4,11 @@ using System.Text;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using HtmlAgilityPack;
 
 namespace SmartProvider
 {
-    class WebSearch
+    public class WebSearch
     {
         private PackageSource _source;
 
@@ -39,17 +40,36 @@ namespace SmartProvider
 
         private List<Uri> GetUrlIHtml(string uri, string patternPresent, string patternAbsent)
         {
-            MatchCollection matches = Regex.Matches(this.GetWebContent(uri),
-                @"\b((https?|ftp|file)://|(www|ftp)\.)[-A-Z0-9+&@#/%?=~_|$!:,.;]*[A-Z0-9+&@#/%=~_|$]", RegexOptions.IgnoreCase);
+            var content = this.GetWebContent(uri);
+            HtmlDocument htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(content);
 
             List<Uri> packageDownloadLocation = new List<Uri>();
 
-            foreach (Match match in matches)
+            if (htmlDoc.DocumentNode != null)
             {
-                if (match.ToString().Contains(patternPresent) && !match.ToString().Contains(patternAbsent))
+                var googleLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
+
+                foreach (var googleLink in googleLinks)
                 {
-                    Uri downloadUri = new Uri(match.Value.ToString());
-                    packageDownloadLocation.Add(downloadUri);
+                    var value = googleLink.GetAttributeValue("href", null);
+                    if (value != null)
+                    {
+                        if (value.Contains(patternPresent) && !value.Contains(patternAbsent))
+                        {
+                            if (value.IsValidUri())
+                            {
+                                Uri downloadUri = new Uri(value);
+                                packageDownloadLocation.Add(downloadUri);
+                            }
+                            // Google appends /url?q=
+                            else if (value.Substring(7).IsValidUri())
+                            {
+                                Uri downloadUri = new Uri(value.Substring(7));
+                                packageDownloadLocation.Add(downloadUri);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -65,7 +85,7 @@ namespace SmartProvider
         {
             //return new List<Uri> { new Uri("https://notepad-plus-plus.org/download/"), new Uri("http://download.cnet.com/Notepad/3000-2352_4-10327521.html"), new Uri("http://notepad-plus.en.softonic.com/download"), new Uri("http://filehippo.com/download_notepad/") };
 
-            return this.GetUrlIHtml("http://google.com/search?q=" + name + "%20download%20location", "/download", "google");
+            return this.GetUrlIHtml("http://google.com/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", "google");
         }
     }
 }

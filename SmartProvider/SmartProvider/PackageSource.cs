@@ -4,7 +4,7 @@ using System.IO;
 
 namespace SmartProvider
 {
-    internal class PackageSource
+    public class PackageSource
     {
         [JsonProperty]
         internal string Name { get; set; }

@@ -14,5 +14,15 @@ namespace SmartProvider
         {
             yield return item;
         }
+
+        internal static bool IsValidUri(this string uri)
+        {
+            if (uri.StartsWith("http") || uri.StartsWith("http") || uri.StartsWith("ftp"))
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }
