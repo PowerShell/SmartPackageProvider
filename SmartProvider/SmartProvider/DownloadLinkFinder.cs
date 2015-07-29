@@ -94,12 +94,11 @@ namespace SmartProvider
         private async static Task<bool> CheckPotentialExe(Uri uri)
         {
             var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(uri);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, uri);
+            var response = await httpClient.SendAsync(request);
 
             //will throw an exception if not successful
             response.EnsureSuccessStatusCode();
-
-            //string content = await response.Content.ReadAsStringAsync();
 
             IEnumerable<string> values;
             if (response.Content.Headers.TryGetValues("Content-Type", out values))
