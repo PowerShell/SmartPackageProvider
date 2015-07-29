@@ -4,10 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using OneGet.Sdk;
+using Microsoft.PackageManagement.Internal.Api;
 using System.Text.RegularExpressions;
-using Constants = OneGet.Sdk.Constants;
-using ErrorCategory = OneGet.Sdk.ErrorCategory;
+using Constants = Microsoft.PackageManagement.Internal.Constants;
+using ErrorCategory = Microsoft.PackageManagement.Internal.ErrorCategory;
 
 namespace SmartProvider
 {
@@ -62,7 +62,7 @@ namespace SmartProvider
         /// Performs one-time initialization of the $provider.
         /// </summary>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void InitializeProvider(Request request)
+        public void InitializeProvider(IRequest request)
         {
             request.Debug("Calling '{0}::InitializeProvider'", PackageProviderName);
         }
@@ -71,11 +71,14 @@ namespace SmartProvider
         /// Returns a collection of strings to the client advertising features this provider supports.
         /// </summary>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void GetFeatures(Request request)
+        public void GetFeatures(IRequest request)
         {
             request.Debug("Calling '{0}::GetFeatures' ", PackageProviderName);
 
-            request.Yield(Features);
+            foreach (var feature in Features)
+            {
+                request.Yield(feature);
+            }
         }
 
         /// <summary>
@@ -87,7 +90,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="category">The category of dynamic options that the HOST is interested in</param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void GetDynamicOptions(string category, Request request)
+        public void GetDynamicOptions(string category, IRequest request)
         {
             request.Debug("Calling '{0}::GetDynamicOptions' {1}", PackageProviderName, category);
 
@@ -100,13 +103,13 @@ namespace SmartProvider
                     break;
 
                 case "source":
-                    request.YieldDynamicOption("ConfigFile", Constants.OptionType.String, false);
+                    request.YieldDynamicOption("ConfigFile", "String", false);
                     //request.YieldDynamicOption("SkipValidate", Constants.OptionType.Switch, false);
                     break;
 
                 // applies to Get-Package, Install-Package, Uninstall-Package
                 case "install":
-                    request.YieldDynamicOption("Destination", Constants.OptionType.Path, true);
+                    request.YieldDynamicOption("Destination", "Folder", false);
                     //request.YieldDynamicOption("SkipDependencies", Constants.OptionType.Switch, false);
                     //request.YieldDynamicOption("ContinueOnFailure", Constants.OptionType.Switch, false);
                     //request.YieldDynamicOption("ExcludeVersion", Constants.OptionType.Switch, false);
@@ -125,7 +128,7 @@ namespace SmartProvider
         /// Sources are returned using <c>request.YieldPackageSource(...)</c>
         /// </summary>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void ResolvePackageSources(Request request)
+        public void ResolvePackageSources(IRequest request)
         {
             request.Debug("Calling '{0}::ResolvePackageSources'", PackageProviderName);
 
@@ -183,7 +186,7 @@ namespace SmartProvider
         /// <param name="location">The location (ie, directory, URL, etc) of the package source. If this is null or empty, the PROVIDER should use the name as the location (if valid)</param>
         /// <param name="trusted">A boolean indicating that the user trusts this package source. Packages returned from this source should be marked as 'trusted'</param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void AddPackageSource(string name, string location, bool trusted, Request request)
+        public void AddPackageSource(string name, string location, bool trusted, IRequest request)
         {
             request.Debug("Calling '{0}::AddPackageSource' '{1}','{2}','{3}'", PackageProviderName, name, location, trusted);
             ProviderStorage.AddPackageSource(name, location, trusted, request);
@@ -194,7 +197,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="name">The name or location of a package source to remove.</param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void RemovePackageSource(string name, Request request)
+        public void RemovePackageSource(string name, IRequest request)
         {
             request.Debug("Calling '{0}::RemovePackageSource' '{1}'", PackageProviderName, name);
             ProviderStorage.RemovePackageSource(name, request);
@@ -212,18 +215,18 @@ namespace SmartProvider
         /// <param name="maximumVersion">A maximum version of the package. Null or empty if the user did not specify</param>
         /// <param name="id">if this is greater than zero (and the number should have been generated using <c>StartFind(...)</c>, the core is calling this multiple times to do a batch search request. The operation can be delayed until <c>CompleteFind(...)</c> is called</param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void FindPackage(string name, string requiredVersion, string minimumVersion, string maximumVersion, int id, Request request)
+        public void FindPackage(string name, string requiredVersion, string minimumVersion, string maximumVersion, int id, IRequest request)
         {
             request.Debug("Calling '{0}::FindPackage' '{1}','{2}','{3}','{4}'", PackageProviderName, requiredVersion, minimumVersion, maximumVersion, id);
 
             List<PackageSource> sources;
             var providerPackageSources = ProviderStorage.GetPackageSources(request);
-
-            if (request.PackageSources != null && request.PackageSources.Any())
+            
+            if (request.Sources != null && request.Sources.Any())
             {
                 sources = new List<PackageSource>();
 
-                foreach (var userRequestedSource in request.PackageSources)
+                foreach (var userRequestedSource in request.Sources)
                 {
                     if (providerPackageSources.ContainsKey(userRequestedSource))
                     {
@@ -261,19 +264,20 @@ namespace SmartProvider
                     }
                 }
 
-                // TODO: for now we're picking the first one
-                // TODO: e.g. check if downloadLink is the same domain as url
+                // TODO: for now we're returning all potential downloads for the user to choose from
+                // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url
                 if (null == downloadLinks || 0 == downloadLinks.Count)
                 { return; }
 
-                var bestDownloadLink = downloadLinks.FirstOrDefault();
-
-                var packageItem = new PackageItem(source, bestDownloadLink.ToString(), "1.0");
-
-                // YieldPackage returns false when operation was cancelled
-                if (!request.YieldPackage(packageItem, name))
+                foreach (var downloadLink in downloadLinks)
                 {
-                    return;
+                    var packageItem = new PackageItem(source, downloadLink.ToString(), "");
+
+                    // YieldPackage returns false when operation was cancelled
+                    if (!request.YieldPackage(packageItem, name))
+                    {
+                        return;
+                    }
                 }
             }
         }
@@ -286,7 +290,7 @@ namespace SmartProvider
         /// <param name="file">the full path to the file to determine if it is a package</param>
         /// <param name="id">if this is greater than zero (and the number should have been generated using <c>StartFind(...)</c>, the core is calling this multiple times to do a batch search request. The operation can be delayed until <c>CompleteFind(...)</c> is called</param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void FindPackageByFile(string file, int id, Request request)
+        public void FindPackageByFile(string file, int id, IRequest request)
         {
             request.Debug("Calling '{0}::FindPackageByFile' '{1}','{2}'", PackageProviderName, file, id);
         }
@@ -301,7 +305,7 @@ namespace SmartProvider
         /// <param name="uri">the URI the client requesting a package for.</param>
         /// <param name="id">if this is greater than zero (and the number should have been generated using <c>StartFind(...)</c>, the core is calling this multiple times to do a batch search request. The operation can be delayed until <c>CompleteFind(...)</c> is called</param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void FindPackageByUri(Uri uri, int id, Request request)
+        public void FindPackageByUri(Uri uri, int id, IRequest request)
         {
             request.Debug("Calling '{0}::FindPackageByUri' '{1}','{2}'", PackageProviderName, uri, id);
         }
@@ -312,7 +316,7 @@ namespace SmartProvider
         /// <param name="fastPackageReference"></param>
         /// <param name="location"></param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void DownloadPackage(string fastPackageReference, string location, Request request)
+        public void DownloadPackage(string fastPackageReference, string location, IRequest request)
         {
             request.Debug("Calling '{0}::DownloadPackage' '{1}','{2}'", PackageProviderName, fastPackageReference, location);
 
@@ -321,7 +325,7 @@ namespace SmartProvider
             string version;
             if (!fastPackageReference.TryParseFastPath(out source, out id, out version))
             {
-                request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
+                request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath);
             }
 
             // TODO: download
@@ -335,7 +339,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="fastPackageReference"></param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void GetPackageDependencies(string fastPackageReference, Request request)
+        public void GetPackageDependencies(string fastPackageReference, IRequest request)
         {
             request.Debug("Calling '{0}::GetPackageDependencies' '{1}'", PackageProviderName, fastPackageReference);
         }
@@ -345,7 +349,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="fastPackageReference">A provider supplied identifier that specifies an exact package</param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void InstallPackage(string fastPackageReference, Request request)
+        public void InstallPackage(string fastPackageReference, IRequest request)
         {
             request.Debug("Calling '{0}::InstallPackage' '{1}'", PackageProviderName, fastPackageReference);
 
@@ -369,7 +373,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="fastPackageReference"></param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void UninstallPackage(string fastPackageReference, Request request)
+        public void UninstallPackage(string fastPackageReference, IRequest request)
         {
             request.Debug("Calling '{0}::UninstallPackage' '{1}'", PackageProviderName, fastPackageReference);
 
@@ -389,7 +393,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="name"></param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void GetInstalledPackages(string name, string requiredVersion, string minimumVersion, string maximumVersion, Request request)
+        public void GetInstalledPackages(string name, string requiredVersion, string minimumVersion, string maximumVersion, IRequest request)
         {
             // TODO: improve this debug message that tells us what's going on.
             request.Debug("Calling '{0}::GetInstalledPackages' '{1}'", PackageProviderName, name);
@@ -402,7 +406,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="fastPackageReference"></param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
-        public void GetPackageDetails(string fastPackageReference, Request request)
+        public void GetPackageDetails(string fastPackageReference, IRequest request)
         {
             // TODO: improve this debug message that tells us what's going on.
             request.Debug("Calling '{0}::GetPackageDetails' '{1}'", PackageProviderName, fastPackageReference);
@@ -415,7 +419,7 @@ namespace SmartProvider
         /// </summary>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
         /// <returns></returns>
-        public int StartFind(Request request)
+        public int StartFind(IRequest request)
         {
             // TODO: improve this debug message that tells us what's going on.
             request.Debug("Calling '{0}::StartFind'", PackageProviderName);
@@ -430,7 +434,7 @@ namespace SmartProvider
         /// <param name="id"></param>
         /// <param name="request">An object passed in from the CORE that contains functions that can be used to interact with the CORE and HOST</param>
         /// <returns></returns>
-        public void CompleteFind(int id, Request request)
+        public void CompleteFind(int id, IRequest request)
         {
             // TODO: improve this debug message that tells us what's going on.
             request.Debug("Calling '{0}::CompleteFind' '{1}'", PackageProviderName, id);

@@ -49,6 +49,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\Constants.cs" />
+    <Compile Include="Api\ErrorCategory.cs" />
+    <Compile Include="Api\ICoreApi.cs" />
+    <Compile Include="Api\IHostAPI.cs" />
+    <Compile Include="Api\IProviderServices.cs" />
+    <Compile Include="Api\IRequest.cs" />
+    <Compile Include="Api\IResponseApi.cs" />
     <Compile Include="DownloadLinkFinder.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="FastPathExtensions.cs" />
@@ -57,9 +64,6 @@
     <Compile Include="ProviderStorage.cs" />
     <Compile Include="RequestExtensions.cs" />
     <Compile Include="Resources\Messages.Designer.cs" />
-    <Compile Include="Sdk\Constants.cs" />
-    <Compile Include="Sdk\ErrorCategory.cs" />
-    <Compile Include="Sdk\Request.cs" />
     <Compile Include="SmartProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StringExtensions.cs" />

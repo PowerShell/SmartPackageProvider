@@ -5,7 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using OneGet.Sdk;
+using Microsoft.PackageManagement.Internal.Api;
+using Microsoft.PackageManagement.Internal;
 
 namespace SmartProvider
 {
@@ -21,14 +22,14 @@ namespace SmartProvider
   }
 }";
 
-        internal static IDictionary<string, PackageSource> GetPackageSources(Request request)
+        internal static IDictionary<string, PackageSource> GetPackageSources(IRequest request)
         {
             var filePath = GetConfigurationFileLocation(request);
             var packageSources = JsonConvert.DeserializeObject<IDictionary<string, PackageSource>>(File.ReadAllText(filePath));
             return packageSources ?? new Dictionary<string, PackageSource>();
         }
 
-        internal static void AddPackageSource(string name, string location, bool trusted, Request request)
+        internal static void AddPackageSource(string name, string location, bool trusted, IRequest request)
         {
             IDictionary<string, PackageSource> packageSources = GetPackageSources(request);
 
@@ -42,7 +43,7 @@ namespace SmartProvider
             SavePackageSources(packageSources, request);
         }
 
-        internal static void RemovePackageSource(string name, Request request)
+        internal static void RemovePackageSource(string name, IRequest request)
         {
             IDictionary<string, PackageSource> packageSources = GetPackageSources(request);
 
@@ -56,14 +57,14 @@ namespace SmartProvider
             SavePackageSources(packageSources, request);
         }
 
-        private static void SavePackageSources(IDictionary<string, PackageSource> packageSources, Request request)
+        private static void SavePackageSources(IDictionary<string, PackageSource> packageSources, IRequest request)
         {
             var filePath = GetConfigurationFileLocation(request);
             string json = JsonConvert.SerializeObject(packageSources, Formatting.Indented);
             File.WriteAllText(filePath, json);
         }
 
-        private static string GetConfigurationFileLocation(Request request)
+        private static string GetConfigurationFileLocation(IRequest request)
         {
             var filePath = request.GetOptionValue("ConfigFile");
             if (String.IsNullOrEmpty(filePath))
