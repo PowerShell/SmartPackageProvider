@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
+using System.Linq;
 
 namespace SmartProvider
 {
@@ -48,11 +49,11 @@ namespace SmartProvider
 
             if (htmlDoc.DocumentNode != null)
             {
-                var googleLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
+                var searchEngineLinks = htmlDoc.DocumentNode.SelectNodes("//a[@href]");
 
-                foreach (var googleLink in googleLinks)
+                foreach (var searchEngineLink in searchEngineLinks)
                 {
-                    var value = googleLink.GetAttributeValue("href", null);
+                    var value = searchEngineLink.GetAttributeValue("href", null);
                     if (value != null)
                     {
                         if (value.Contains(patternPresent) && !value.Contains(patternAbsent))
@@ -62,7 +63,7 @@ namespace SmartProvider
                                 Uri downloadUri = new Uri(value);
                                 packageDownloadLocation.Add(downloadUri);
                             }
-                            // Google appends /url?q=
+                            // Google/Bing appends /url?q=
                             else if (value.Substring(7).IsValidUri())
                             {
                                 Uri downloadUri = new Uri(value.Substring(7));
@@ -72,8 +73,9 @@ namespace SmartProvider
                     }
                 }
             }
-
-            return packageDownloadLocation;
+            
+            return packageDownloadLocation.GetRange(0,3);
+           
         }
 
         public WebSearch(PackageSource source)
@@ -82,9 +84,8 @@ namespace SmartProvider
         }
 
         public List<Uri> Search(string name)
-        {
-            string packageSourceLocation = _source.Location;
-            return this.GetUrlIHtml(packageSourceLocation + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", "google");
+        {            
+            return this.GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name);
         }
     }
 }
