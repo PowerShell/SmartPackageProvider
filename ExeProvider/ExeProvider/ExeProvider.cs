@@ -8,6 +8,7 @@ using OneGet.Sdk;
 using System.Text.RegularExpressions;
 using Constants = OneGet.Sdk.Constants;
 using ErrorCategory = OneGet.Sdk.ErrorCategory;
+using System.Diagnostics;
 
 namespace ExeProvider
 {
@@ -313,6 +314,32 @@ namespace ExeProvider
             request.Debug("Calling '{0}::GetPackageDependencies' '{1}'", PackageProviderName, fastPackageReference);
         }
 
+        // 
+        static readonly Dictionary<string, string> KnowInstallerInfo = new Dictionary<string, string>()
+        {
+            {"", "" }
+        };
+
+        private Tuple<string,string> FindAppNameSilentArgs(string fullPath)
+        {
+            var name = Path.GetFileNameWithoutExtension(fullPath);
+            //sometimes name can be a previx with . or _ seperated with version and other info
+            // try get the only name part
+            if (!string.IsNullOrEmpty(name))
+            {
+                var names = name.Split('.','_','-');
+                if(names.Length >= 1)
+                {
+                    var basicName = names[0];
+                    string appSilentOpt;
+                    if(KnowInstallerInfo.TryGetValue(basicName, out appSilentOpt))
+                    {
+                        return new Tuple<string, string>(basicName,appSilentOpt);
+                    }
+                }
+            }
+            return null;
+        }
         /// <summary>
         /// Installs a given package.
         /// </summary>
@@ -324,13 +351,55 @@ namespace ExeProvider
 
             string source; //ignore
             string id; //url or file path
-            string version; //
+            string version; 
             if (!fastPackageReference.TryParseFastPath(out source, out id, out version))
             {
                 request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
             }
 
-            // TODO: install
+            var error = DscInvoker.SetLCMToDisabled();
+            if(error != null)
+            {
+                request.Error(ErrorCategory.InvalidOperation, fastPackageReference, error.ErrorDetails.Message);
+            }
+
+            request.Debug("set the local LCM to disabled mode");
+
+            request.Debug("try getting silent install option");
+
+            var option = FindAppNameSilentArgs(id);
+
+            if (option != null)
+            {
+                error = DscInvoker.InvokeDscPackegeResource(option.Item1, option.Item2, id);
+                if (error != null)
+                {
+                    request.Error(ErrorCategory.InvalidOperation, fastPackageReference, error.ErrorDetails.Message);
+                }
+            }
+            else
+            {
+                // Prepare the process to run
+                ProcessStartInfo start = new ProcessStartInfo();
+                // Enter the executable to run, including the complete path
+                start.FileName = id;
+                // Do you want to show a console window?
+                start.WindowStyle = ProcessWindowStyle.Normal;
+                //start.CreateNoWindow = true;
+
+                // Run the external process & wait for it to finish
+                using (Process proc = Process.Start(start))
+                {
+                    proc.WaitForExit();
+
+                    // Retrieve the app's exit code
+                    var exitCode = proc.ExitCode;
+                    if(exitCode != 0)
+                    {
+                        request.Error(ErrorCategory.InvalidOperation, fastPackageReference, string.Format("running installation package {0} failed, error detail is {1}",id, proc.StandardError.ReadToEnd()));
+                    }
+                }
+            }
         }
 
         /// <summary>
