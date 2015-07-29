@@ -56,25 +56,28 @@ namespace SmartProvider
                     var value = searchEngineLink.GetAttributeValue("href", null);
                     if (value != null)
                     {
-                        if (value.Contains(patternPresent) && !value.Contains(patternAbsent))
+                        if (patternPresent == null || value.Contains(patternPresent))
                         {
-                            if (value.IsValidUri())
+                            if (patternAbsent == null || !value.Contains(patternAbsent))
                             {
-                                Uri downloadUri = new Uri(value);
-                                packageDownloadLocation.Add(downloadUri);
-                            }
-                            // Google/Bing appends /url?q=
-                            else if (value.Substring(7).IsValidUri())
-                            {
-                                Uri downloadUri = new Uri(value.Substring(7));
-                                packageDownloadLocation.Add(downloadUri);
+                                if (value.IsValidUri())
+                                {
+                                    Uri downloadUri = new Uri(value);
+                                    packageDownloadLocation.Add(downloadUri);
+                                }
+                                // Google/Bing appends /url?q=
+                                else if (value.Substring(7).IsValidUri())
+                                {
+                                    Uri downloadUri = new Uri(value.Substring(7));
+                                    packageDownloadLocation.Add(downloadUri);
+                                }
                             }
                         }
                     }
                 }
             }
             
-            return packageDownloadLocation.GetRange(0,3);
+            return packageDownloadLocation;
            
         }
 
@@ -83,9 +86,11 @@ namespace SmartProvider
             _source = source;
         }
 
-        public List<Uri> Search(string name)
-        {            
-            return this.GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name);
+        public List<Uri> Search(string name, int howMany)
+        {
+            var allResults = GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name);
+
+            return allResults.GetRange(0, Math.Min(howMany, allResults.Count));
         }
     }
 }

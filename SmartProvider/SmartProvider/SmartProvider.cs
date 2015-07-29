@@ -247,7 +247,7 @@ namespace SmartProvider
             foreach (var source in sources)
             {
                 var webSearch = new WebSearch(source);
-                var urls = webSearch.Search(name);
+                var urls = webSearch.Search(name, 3);
 
                 List<Uri> downloadLinks = new List<Uri>();
                 foreach (var url in urls)

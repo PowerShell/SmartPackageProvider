@@ -10,8 +10,8 @@ namespace SmartProviderTests
         [TestMethod]
         public void SearchNotepadPlusPlus()
         {
-            WebSearch webSearch = new WebSearch(new PackageSource());
-            var results = webSearch.Search("notepad++");
+            WebSearch webSearch = new WebSearch(new PackageSource("Google", "http://google.com"));
+            var results = webSearch.Search("notepad++", 30);
 
             Assert.IsTrue(results.FuzzyContains("https://notepad-plus-plus.org/download/"));
 
