@@ -107,7 +107,7 @@ namespace ExeProvider
 
                 // applies to Get-Package, Install-Package, Uninstall-Package
                 case "install":
-                    request.YieldDynamicOption("Destination", Constants.OptionType.Path, true);
+                    request.YieldDynamicOption("Destination", Constants.OptionType.Path, false);
                     //request.YieldDynamicOption("SkipDependencies", Constants.OptionType.Switch, false);
                     //request.YieldDynamicOption("ContinueOnFailure", Constants.OptionType.Switch, false);
                     //request.YieldDynamicOption("ExcludeVersion", Constants.OptionType.Switch, false);
