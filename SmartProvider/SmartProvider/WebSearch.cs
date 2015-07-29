@@ -83,7 +83,8 @@ namespace SmartProvider
 
         public List<Uri> Search(string name)
         {
-            return this.GetUrlIHtml("http://google.com/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", "google");
+            string packageSourceLocation = _source.Location;
+            return this.GetUrlIHtml(packageSourceLocation + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", "google");
         }
     }
 }
