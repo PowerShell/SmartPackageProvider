@@ -315,12 +315,25 @@ namespace ExeProvider
         }
 
         // 
-        static readonly Dictionary<string, string> KnowInstallerInfo = new Dictionary<string, string>()
+        static readonly Dictionary<string, string> KnowInstallerInfo = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            {"", "" }
+            {"git", @"/VERYSILENT /NORESTART /NOCANCEL /SP- /NOICONS /COMPONENTS=""icons,icons\quicklaunch,ext,ext\reg,ext\reg\shellhere,ext\reg\guihere,assoc,assoc_sh"" /LOG" },
+            {"npp", "/S" },
+            {"firefox", "-ms" },
+            //need prefix comparer for adobe reader
+            {"AcroRdrDC1500720033_MUI","/sAll /msi /norestart /quiet ALLUSERS=1 EULA_ACCEPT=YES" },
+            {"vlc", "/S" },
+            {"Atom","--silent" },
+            //same prefix comparer for jre
+            {"jre8","/s REBOOT=Suppress" },
+            {"ccsetup508", "/S" },
+            {"rubyinstaller", @"/verysilent /tasks=""assocfiles,modpath""" },
+            {"filezilla", "/S" },
+            {"gvim", "/S" },
+            {"dropbox", "/S" }
         };
 
-        private Tuple<string,string> FindAppNameSilentArgs(string fullPath)
+        private Tuple<string, string> FindAppNameSilentArgs(string fullPath)
         {
             var name = Path.GetFileNameWithoutExtension(fullPath);
             //sometimes name can be a previx with . or _ seperated with version and other info
