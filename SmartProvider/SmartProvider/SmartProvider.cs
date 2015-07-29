@@ -249,7 +249,12 @@ namespace SmartProvider
                 List<Uri> downloadLinks = new List<Uri>();
                 foreach (var url in urls)
                 {
-                    var downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
+                    Uri downloadLink = null;
+                    try
+                    {
+                        downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
+                    }
+                    catch { }
                     if (downloadLink != null)
                     {
                         downloadLinks.Add(downloadLink);
@@ -258,6 +263,9 @@ namespace SmartProvider
 
                 // TODO: for now we're picking the first one
                 // TODO: e.g. check if downloadLink is the same domain as url
+                if (null == downloadLinks || 0 == downloadLinks.Count)
+                { return; }
+
                 var bestDownloadLink = downloadLinks.FirstOrDefault();
 
                 var packageItem = new PackageItem(source, bestDownloadLink.ToString(), "1.0");
