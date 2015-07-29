@@ -29,7 +29,7 @@ namespace SmartProvider
                 var exeLinks = htmlDoc.DocumentNode.SelectNodes("//a[contains(@href,'exe')]");
 
                 //TODO: select best exe
-                var bestExeLink = (null != exeLinks)?exeLinks[0] : null;
+                var bestExeLink = (null != exeLinks) ? exeLinks[0] : null;
 
                 if (bestExeLink != null)
                 {
@@ -81,6 +81,24 @@ namespace SmartProvider
                                 if (await CheckPotentialExe(cnetMetaRefreshUri))
                                 {
                                     return cnetMetaRefreshUri;
+                                }
+                            }
+
+                            // search for cnet-specific tag
+                            var hiddenDiv = htmlDoc.DocumentNode.SelectNodes("//div[@data-download-now-url]");
+                            if (hiddenDiv != null && hiddenDiv.Count > 0)
+                            {
+                                var link = hiddenDiv[0].Attributes["data-download-now-url"];
+                                if (link != null)
+                                {
+                                    if (link.Value.IsValidUri())
+                                    {
+                                        var linkAddress = new Uri(link.Value);
+                                        if (await CheckPotentialExe(linkAddress))
+                                        {
+                                            return linkAddress;
+                                        }
+                                    }
                                 }
                             }
                         }

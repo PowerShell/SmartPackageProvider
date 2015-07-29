@@ -36,5 +36,15 @@ namespace SmartProviderTests
             var uri = DownloadLinkFinder.GetDownloadLink(new Uri(searchResult)).Result;
             Assert.IsTrue(uri.ToString().Contains(expected));
         }
+
+        [TestMethod]
+        public void NotepadPlusPlus4()
+        {
+            string searchResult = @"http://download.cnet.com/Notepad/3000-2352_4-10327521.html&amp;sa=U&amp;ved=0CDsQFjAHahUKEwjHhOOTyP_GAhWTMogKHYyfDLc&amp;usg=AFQjCNHsZQSNDrak4OrD5fTwyPAzuFTUGA";
+            string expected = @"npp.6.8.Installer.exe";
+
+            var uri = DownloadLinkFinder.GetDownloadLink(new Uri(searchResult)).Result;
+            Assert.IsTrue(uri.ToString().Contains(expected));
+        }
     }
 }
