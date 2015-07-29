@@ -361,10 +361,13 @@ namespace SmartProvider
                 request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
             }
 
-            // TODO: install
-            var tempLocation = @"c:\users\dagrala\desktop\aaa\test.exe";
-            var tempLocation2 = @"c:\users\dagrala\desktop\aaa\7z920-x64.msi";
-            request.ProviderServices.DownloadFile(new Uri(id), tempLocation, request);
+            Uri uri = new Uri(id);
+            string filename = Path.GetFileName(uri.LocalPath);
+            var tempLocation = Path.GetTempPath() + filename;
+            var tempLocation2 = @"C:\Users\dagrala\Downloads\choco\7z920-x64.msi";
+            request.ProviderServices.DownloadFile(uri, tempLocation, request);
+
+            // TODO: for some reason for .exe it calls back into SMART provider instead of EXE provider. Need to debug.
             request.ProviderServices.Install(tempLocation2, null, request);
         }
 
