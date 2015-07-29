@@ -25,7 +25,7 @@ namespace ExeProvider
         protected static Dictionary<string, string[]> Features = new Dictionary<string, string[]> {
             {Constants.Features.SupportedSchemes, new[] {"http", "https", "file"}},
             {Constants.Features.SupportedExtensions, new[] {"exe"}},
-            {Constants.Features.MagicSignatures, new[] {Constants.Signatures.Zip}},
+            {Constants.Features.MagicSignatures, new[] {"4d5a"}},
         };
 
 
@@ -107,7 +107,7 @@ namespace ExeProvider
 
                 // applies to Get-Package, Install-Package, Uninstall-Package
                 case "install":
-                    request.YieldDynamicOption("Destination", Constants.OptionType.Path, false);
+                    request.YieldDynamicOption("Destination", "Folder", false);
                     //request.YieldDynamicOption("SkipDependencies", Constants.OptionType.Switch, false);
                     //request.YieldDynamicOption("ContinueOnFailure", Constants.OptionType.Switch, false);
                     //request.YieldDynamicOption("ExcludeVersion", Constants.OptionType.Switch, false);
@@ -263,6 +263,30 @@ namespace ExeProvider
         public void FindPackageByFile(string file, int id, Request request)
         {
             request.Debug("Calling '{0}::FindPackageByFile' '{1}','{2}'", PackageProviderName, file, id);
+
+            List<PackageSource> sources;
+            var providerPackageSources = ProviderStorage.GetPackageSources(request);
+
+            if (request.PackageSources != null && request.PackageSources.Any())
+            {
+                sources = new List<PackageSource>();
+
+                foreach (var userRequestedSource in request.PackageSources)
+                {
+                    if (providerPackageSources.ContainsKey(userRequestedSource))
+                    {
+                        sources.Add(providerPackageSources[userRequestedSource]);
+                    }
+                }
+            }
+            else
+            {
+                sources = providerPackageSources.Select(i => i.Value).ToList();
+            }
+
+            var source = sources.FirstOrDefault();
+
+            request.YieldPackage(new PackageItem(source, file, ""), file);
         }
 
         /// <summary>
