@@ -19,8 +19,25 @@ namespace SmartProvider
     ""Trusted"": false,
     ""IsRegistered"": true,
     ""IsValidated"": true
+  },
+
+""Bing"": {
+    ""Name"": ""Bing"",
+    ""Location"": ""https://bing.com"",
+    ""Trusted"": false,
+    ""IsRegistered"": true,
+    ""IsValidated"": true
+  },
+
+""ProductsWeb"": {
+    ""Name"": ""ProductsWeb"",
+    ""Location"": ""http://productsweb/"",
+    ""Trusted"": false,
+    ""IsRegistered"": true,
+    ""IsValidated"": true
   }
 }";
+
 
         internal static IDictionary<string, PackageSource> GetPackageSources(IRequest request)
         {
