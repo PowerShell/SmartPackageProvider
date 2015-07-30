@@ -1,5 +1,5 @@
 # SMART & EXE Package Providers
-Microsoft Hackathon 2015 project - find, download and install applications in one line of PowerShell.
+Microsoft Hackathon 2015 project - find, download and install applications in one line of PowerShell. Supports MSI and EXE installation.
 
 # Usage
 ```powershell
