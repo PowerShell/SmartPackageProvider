@@ -247,17 +247,15 @@ namespace SmartProvider
             foreach (var source in sources)
             {
                 var webSearch = new WebSearch(source);
-                var urls = webSearch.Search(name, 3);
+                var urls = new HashSet<Uri>(webSearch.Search(name, 3));
 
                 List<Uri> downloadLinks = new List<Uri>();
                 foreach (var url in urls)
                 {
                     Uri downloadLink = null;
-                    try
-                    {
-                        downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
-                    }
-                    catch { }
+
+                    downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
+
                     if (downloadLink != null)
                     {
                         downloadLinks.Add(downloadLink);

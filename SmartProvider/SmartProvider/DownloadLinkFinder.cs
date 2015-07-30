@@ -15,8 +15,10 @@ namespace SmartProvider
             var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(uri);
 
-            //will throw an exception if not successful
-            response.EnsureSuccessStatusCode();
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                return null;
+            }
 
             string content = await response.Content.ReadAsStringAsync();
 
@@ -62,8 +64,10 @@ namespace SmartProvider
                         // THIRD, check for meta refresh
                         response = await httpClient.GetAsync(redirectLink);
 
-                        //will throw an exception if not successful
-                        response.EnsureSuccessStatusCode();
+                        if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                        {
+                            return null;
+                        }
 
                         content = await response.Content.ReadAsStringAsync();
 

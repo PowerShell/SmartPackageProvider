@@ -34,3 +34,8 @@ The files to copy are:
 Get-PackageProvider
 ```
 You should see SMART and EXE providers.
+
+# Verified with:
+ - Notepad++
+ - Vivaldi
+ - 7zip
