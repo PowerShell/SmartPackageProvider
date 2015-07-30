@@ -46,5 +46,15 @@ namespace SmartProviderTests
             var uri = DownloadLinkFinder.GetDownloadLink(new Uri(searchResult)).Result;
             Assert.IsTrue(uri.ToString().Contains(expected));
         }
+
+        [TestMethod]
+        public void Crawl7Zip()
+        {
+            string searchResult = @"http://www.7-zip.org/download.html";
+            string expected = @"7z1505.exe";
+
+            var uri = DownloadLinkFinder.GetDownloadLink(new Uri(searchResult)).Result;
+            Assert.IsTrue(uri.ToString().Contains(expected));
+        }
     }
 }
