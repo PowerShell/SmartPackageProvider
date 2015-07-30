@@ -264,11 +264,13 @@ namespace SmartProvider
                     }
                 }
 
+                if (null == downloadLinks || 0 == downloadLinks.Count)
+                {
+                    continue;
+                }
+
                 // TODO: for now we're returning all potential downloads for the user to choose from
                 // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url
-                if (null == downloadLinks || 0 == downloadLinks.Count)
-                { return; }
-
                 foreach (var downloadLink in downloadLinks)
                 {
                     var packageItem = new PackageItem(source, downloadLink.ToString(), "");
