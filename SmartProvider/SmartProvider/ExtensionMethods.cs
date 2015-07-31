@@ -26,11 +26,11 @@ namespace SmartProvider
             return false;
         }
 
-        public static bool FuzzyContains(this IEnumerable<Uri> items, string value)
+        public static bool FuzzyContains(this IEnumerable<string> items, string value)
         {
             foreach (var item in items)
             {
-                if (item.ToString().Contains(value))
+                if (item.Contains(value))
                 {
                     return true;
                 }

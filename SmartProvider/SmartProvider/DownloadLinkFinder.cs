@@ -10,8 +10,14 @@ namespace SmartProvider
 {
     public static class DownloadLinkFinder
     {
-        public async static Task<Uri> GetDownloadLink(Uri uri)
+        public async static Task<Uri> GetDownloadLink(string link)
         {
+            if (!link.IsValidUri())
+            {
+                return null;
+            }
+
+            var uri = new Uri(link);
             var httpClient = new HttpClient();
             var response = await httpClient.GetAsync(uri);
 
@@ -92,15 +98,15 @@ namespace SmartProvider
                             var hiddenDiv = htmlDoc.DocumentNode.SelectNodes("//div[@data-download-now-url]");
                             if (hiddenDiv != null && hiddenDiv.Count > 0)
                             {
-                                var link = hiddenDiv[0].Attributes["data-download-now-url"];
-                                if (link != null)
+                                var downloadNowLink = hiddenDiv[0].Attributes["data-download-now-url"];
+                                if (downloadNowLink != null)
                                 {
-                                    if (link.Value.IsValidUri())
+                                    if (downloadNowLink.Value.IsValidUri())
                                     {
-                                        var linkAddress = new Uri(link.Value);
-                                        if (await CheckPotentialExe(linkAddress))
+                                        var downloadNowAddress = new Uri(downloadNowLink.Value);
+                                        if (await CheckPotentialExe(downloadNowAddress))
                                         {
-                                            return linkAddress;
+                                            return downloadNowAddress;
                                         }
                                     }
                                 }

@@ -15,7 +15,7 @@ namespace SmartProviderTests
 
             Assert.IsTrue(results.FuzzyContains("https://notepad-plus-plus.org/download/"));
 
-            // for now, we don't have this link even though we should:
+            // we need more google results to get this:
             //Assert.IsTrue(results.FuzzyContains("http://notepad-plus.en.softonic.com/download"));
 
             Assert.IsTrue(results.FuzzyContains("http://filehippo.com/download_notepad/"));

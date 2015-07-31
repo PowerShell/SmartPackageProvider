@@ -6,12 +6,61 @@ using System.Net;
 using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using System.Linq;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace SmartProvider
 {
     public class WebSearch
     {
         private PackageSource _source;
+
+        public WebSearch(PackageSource source)
+        {
+            _source = source;
+        }
+
+        public IEnumerable<string> Search(string name, int howMany)
+        {
+            if (_source.Location.Contains("google"))
+            {
+                return GoogleSearch(Uri.EscapeDataString(name + " download")).Where(link => link.Contains("/download")).Where(link => !link.Contains("google")).Take(howMany);
+            }
+            else
+            {
+                return GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name).Take(howMany);
+            }
+        }
+
+        private IEnumerable<string> GoogleSearch(string query)
+        {
+            var httpClient = new HttpClient();
+            var response = httpClient.GetAsync(new Uri("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=" + query )).Result;
+
+            if (response.StatusCode != HttpStatusCode.OK)
+            {
+                yield break;
+            }
+
+            string content = response.Content.ReadAsStringAsync().Result;
+
+            dynamic results;
+
+            try
+            {
+                var json = JsonConvert.DeserializeObject<dynamic>(content);
+                results = json.responseData.results;
+            }
+            catch (Exception)
+            {
+                yield break;
+            }
+
+            foreach (var result in results)
+            {
+                yield return result.unescapedUrl;
+            }
+        }
 
         private String GetWebContent(string uri)
         {
@@ -39,7 +88,7 @@ namespace SmartProvider
             return sb.ToString();
         }
 
-        private IEnumerable<Uri> GetUrlIHtml(string uri, string patternPresent, string patternAbsent)
+        private IEnumerable<string> GetUrlIHtml(string uri, string patternPresent, string patternAbsent)
         {
             var content = this.GetWebContent(uri);
             HtmlDocument htmlDoc = new HtmlDocument();
@@ -60,30 +109,18 @@ namespace SmartProvider
                             {
                                 if (value.IsValidUri())
                                 {
-                                    Uri downloadUri = new Uri(value);
-                                    yield return downloadUri;
+                                    yield return value;
                                 }
                                 // Google/Bing appends /url?q=
                                 else if (value.Substring(7).IsValidUri())
                                 {
-                                    Uri downloadUri = new Uri(value.Substring(7));
-                                    yield return downloadUri;
+                                    yield return value.Substring(7);
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-
-        public WebSearch(PackageSource source)
-        {
-            _source = source;
-        }
-
-        public IEnumerable<Uri> Search(string name, int howMany)
-        {
-            return GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name).Take(howMany);
         }
     }
 }
