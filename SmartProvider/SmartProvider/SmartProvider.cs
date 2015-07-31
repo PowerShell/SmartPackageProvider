@@ -249,34 +249,23 @@ namespace SmartProvider
                 var webSearch = new WebSearch(source);
                 var urls = new HashSet<Uri>(webSearch.Search(name, 3));
 
-                var downloadLinks = new HashSet<Uri>();
                 foreach (var url in urls)
                 {
                     Uri downloadLink = null;
 
                     downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
 
+                    // TODO: for now we're returning all potential downloads for the user to choose from
+                    // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url
                     if (downloadLink != null)
                     {
-                        downloadLinks.Add(downloadLink);
-                    }
-                }
+                        var packageItem = new PackageItem(source, downloadLink.ToString(), "");
 
-                if (null == downloadLinks || 0 == downloadLinks.Count)
-                {
-                    continue;
-                }
-
-                // TODO: for now we're returning all potential downloads for the user to choose from
-                // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url
-                foreach (var downloadLink in downloadLinks)
-                {
-                    var packageItem = new PackageItem(source, downloadLink.ToString(), "");
-
-                    // YieldPackage returns false when operation was cancelled
-                    if (!request.YieldPackage(packageItem, name))
-                    {
-                        return;
+                        // YieldPackage returns false when operation was cancelled
+                        if (!request.YieldPackage(packageItem, name))
+                        {
+                            return;
+                        }
                     }
                 }
             }
