@@ -247,13 +247,11 @@ namespace SmartProvider
             foreach (var source in sources)
             {
                 var webSearch = new WebSearch(source);
-                var urls = new HashSet<Uri>(webSearch.Search(name, 3));
+                var downloadWebsites = webSearch.Search(name, 3);
 
-                foreach (var url in urls)
+                foreach (var downloadWebsite in downloadWebsites)
                 {
-                    Uri downloadLink = null;
-
-                    downloadLink = DownloadLinkFinder.GetDownloadLink(url).Result;
+                    var downloadLink = DownloadLinkFinder.GetDownloadLink(downloadWebsite).Result;
 
                     // TODO: for now we're returning all potential downloads for the user to choose from
                     // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url

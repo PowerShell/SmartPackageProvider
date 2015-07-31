@@ -39,13 +39,11 @@ namespace SmartProvider
             return sb.ToString();
         }
 
-        private HashSet<Uri> GetUrlIHtml(string uri, string patternPresent, string patternAbsent)
+        private IEnumerable<Uri> GetUrlIHtml(string uri, string patternPresent, string patternAbsent)
         {
             var content = this.GetWebContent(uri);
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(content);
-
-            var packageDownloadLocations = new HashSet<Uri>();
 
             if (htmlDoc.DocumentNode != null)
             {
@@ -63,22 +61,19 @@ namespace SmartProvider
                                 if (value.IsValidUri())
                                 {
                                     Uri downloadUri = new Uri(value);
-                                    packageDownloadLocations.Add(downloadUri);
+                                    yield return downloadUri;
                                 }
                                 // Google/Bing appends /url?q=
                                 else if (value.Substring(7).IsValidUri())
                                 {
                                     Uri downloadUri = new Uri(value.Substring(7));
-                                    packageDownloadLocations.Add(downloadUri);
+                                    yield return downloadUri;
                                 }
                             }
                         }
                     }
                 }
             }
-            
-            return packageDownloadLocations;
-           
         }
 
         public WebSearch(PackageSource source)
@@ -86,11 +81,9 @@ namespace SmartProvider
             _source = source;
         }
 
-        public List<Uri> Search(string name, int howMany)
+        public IEnumerable<Uri> Search(string name, int howMany)
         {
-            var allResults = GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name);
-
-            return allResults.ToList().GetRange(0, Math.Min(howMany, allResults.Count));
+            return GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name).Take(howMany);
         }
     }
 }
