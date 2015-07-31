@@ -249,7 +249,7 @@ namespace SmartProvider
                 var webSearch = new WebSearch(source);
                 var urls = new HashSet<Uri>(webSearch.Search(name, 3));
 
-                List<Uri> downloadLinks = new List<Uri>();
+                var downloadLinks = new HashSet<Uri>();
                 foreach (var url in urls)
                 {
                     Uri downloadLink = null;

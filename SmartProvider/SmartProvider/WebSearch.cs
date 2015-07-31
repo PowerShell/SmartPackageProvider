@@ -39,13 +39,13 @@ namespace SmartProvider
             return sb.ToString();
         }
 
-        private List<Uri> GetUrlIHtml(string uri, string patternPresent, string patternAbsent)
+        private HashSet<Uri> GetUrlIHtml(string uri, string patternPresent, string patternAbsent)
         {
             var content = this.GetWebContent(uri);
             HtmlDocument htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(content);
 
-            List<Uri> packageDownloadLocation = new List<Uri>();
+            var packageDownloadLocations = new HashSet<Uri>();
 
             if (htmlDoc.DocumentNode != null)
             {
@@ -63,13 +63,13 @@ namespace SmartProvider
                                 if (value.IsValidUri())
                                 {
                                     Uri downloadUri = new Uri(value);
-                                    packageDownloadLocation.Add(downloadUri);
+                                    packageDownloadLocations.Add(downloadUri);
                                 }
                                 // Google/Bing appends /url?q=
                                 else if (value.Substring(7).IsValidUri())
                                 {
                                     Uri downloadUri = new Uri(value.Substring(7));
-                                    packageDownloadLocation.Add(downloadUri);
+                                    packageDownloadLocations.Add(downloadUri);
                                 }
                             }
                         }
@@ -77,7 +77,7 @@ namespace SmartProvider
                 }
             }
             
-            return packageDownloadLocation;
+            return packageDownloadLocations;
            
         }
 
@@ -90,7 +90,7 @@ namespace SmartProvider
         {
             var allResults = GetUrlIHtml(_source.Location + "/search?q=" + Uri.EscapeDataString(name) + "%20download%20location", "/download", _source.Name);
 
-            return allResults.GetRange(0, Math.Min(howMany, allResults.Count));
+            return allResults.ToList().GetRange(0, Math.Min(howMany, allResults.Count));
         }
     }
 }
