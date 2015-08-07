@@ -252,19 +252,26 @@ namespace SmartProvider
 
                 foreach (var downloadWebsite in downloadWebsites)
                 {
-                    var downloadLink = DownloadLinkFinder.GetDownloadLink(downloadWebsite).Result;
-
-                    // TODO: for now we're returning all potential downloads for the user to choose from
-                    // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url
-                    if (downloadLink != null && downloadLinks.Add(downloadLink))
+                    try
                     {
-                        var packageItem = new PackageItem(source, downloadLink.ToString(), "");
+                        var downloadLink = DownloadLinkFinder.GetDownloadLink(downloadWebsite).Result;
 
-                        // YieldPackage returns false when operation was cancelled
-                        if (!request.YieldPackage(packageItem, name))
+                        // TODO: for now we're returning all potential downloads for the user to choose from
+                        // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url
+                        if (downloadLink != null && downloadLinks.Add(downloadLink))
                         {
-                            return;
+                            var packageItem = new PackageItem(source, downloadLink.ToString(), "");
+
+                            // YieldPackage returns false when operation was cancelled
+                            if (!request.YieldPackage(packageItem, name))
+                            {
+                                return;
+                            }
                         }
+                    }
+                    catch (Exception)
+                    {
+                        continue;
                     }
                 }
             }

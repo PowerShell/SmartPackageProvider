@@ -34,31 +34,37 @@ namespace SmartProvider
 
         private IEnumerable<string> GoogleSearch(string query)
         {
-            var httpClient = new HttpClient();
-            var response = httpClient.GetAsync(new Uri("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=" + query )).Result;
-
-            if (response.StatusCode != HttpStatusCode.OK)
+            using (var httpClient = new HttpClient())
             {
-                yield break;
-            }
+                httpClient.Timeout = new TimeSpan(0, 0, 10);
+                var response = httpClient.GetAsync(new Uri("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&rsz=8&q=" + query)).Result;
 
-            string content = response.Content.ReadAsStringAsync().Result;
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    yield break;
+                }
 
-            dynamic results;
+                string content = response.Content.ReadAsStringAsync().Result;
 
-            try
-            {
-                var json = JsonConvert.DeserializeObject<dynamic>(content);
-                results = json.responseData.results;
-            }
-            catch (Exception)
-            {
-                yield break;
-            }
+                dynamic results;
 
-            foreach (var result in results)
-            {
-                yield return result.unescapedUrl;
+                try
+                {
+                    var json = JsonConvert.DeserializeObject<dynamic>(content);
+                    results = json.responseData.results;
+                }
+                catch (Exception)
+                {
+                    yield break;
+                }
+
+                foreach (var result in results)
+                {
+                    if (result.unescapedUrl != null)
+                    {
+                        yield return result.unescapedUrl;
+                    }
+                }
             }
         }
 

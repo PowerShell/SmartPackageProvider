@@ -39,3 +39,4 @@ You should see SMART and EXE providers.
  - Notepad++
  - Vivaldi
  - 7zip
+ - Icon Restore
