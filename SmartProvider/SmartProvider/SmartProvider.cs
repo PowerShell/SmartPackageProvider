@@ -260,7 +260,9 @@ namespace SmartProvider
                         // TODO: we could provide our own ranking, e.g. check if downloadLink is the same domain as url
                         if (downloadLink != null && downloadLinks.Add(downloadLink))
                         {
-                            var packageItem = new PackageItem(source, downloadLink.ToString(), "");
+                            var domainName = downloadLink.GetLeftPart(UriPartial.Authority).Replace("/www.", "/").Replace("http://", "").Replace("https://", "");
+                            var packageSource = new PackageSource(domainName, domainName);
+                            var packageItem = new PackageItem(packageSource, downloadLink.ToString(), "");
 
                             // YieldPackage returns false when operation was cancelled
                             if (!request.YieldPackage(packageItem, name))
