@@ -4,8 +4,19 @@ using System.IO;
 
 namespace ExeProvider
 {
-    internal class PackageSource
+    public class PackageSource
     {
+        // this shouldn't be used, it's only for JSON deserializer
+        public PackageSource()
+        {
+        }
+
+        public PackageSource(string name, string location)
+        {
+            Name = name;
+            Location = location;
+        }
+
         [JsonProperty]
         internal string Name { get; set; }
 

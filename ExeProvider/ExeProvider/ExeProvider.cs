@@ -264,7 +264,7 @@ namespace ExeProvider
         {
             request.Debug("Calling '{0}::FindPackageByFile' '{1}','{2}'", PackageProviderName, file, id);
 
-            List<PackageSource> sources;
+            /*List<PackageSource> sources;
             var providerPackageSources = ProviderStorage.GetPackageSources(request);
 
             if (request.PackageSources != null && request.PackageSources.Any())
@@ -284,7 +284,9 @@ namespace ExeProvider
                 sources = providerPackageSources.Select(i => i.Value).ToList();
             }
 
-            var source = sources.FirstOrDefault();
+            var source = sources.FirstOrDefault();*/
+
+            var source = new PackageSource("Local Filesystem", file) { Trusted = true };
 
             request.YieldPackage(new PackageItem(source, file, ""), file);
         }
@@ -319,7 +321,7 @@ namespace ExeProvider
             string version;
             if (!fastPackageReference.TryParseFastPath(out source, out id, out version))
             {
-                request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
+                request.Error(ErrorCategory.InvalidArgument.ToString(), fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
             }
 
             // TODO: download
@@ -391,13 +393,13 @@ namespace ExeProvider
             string version; 
             if (!fastPackageReference.TryParseFastPath(out source, out id, out version))
             {
-                request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
+                request.Error("", ErrorCategory.InvalidArgument.ToString(), fastPackageReference, Strings.InvalidFastPath);
             }
 
             var error = DscInvoker.SetLCMToDisabled();
             if(error != null)
             {
-                request.Error(ErrorCategory.InvalidOperation, fastPackageReference, error.ErrorDetails.Message);
+                request.Error("", ErrorCategory.InvalidOperation.ToString(), fastPackageReference, error.ErrorDetails.Message);
             }
 
             request.Debug("set the local LCM to disabled mode");
@@ -411,7 +413,7 @@ namespace ExeProvider
                 error = DscInvoker.InvokeDscPackegeResource(option.Item1, option.Item2, id);
                 if (error != null)
                 {
-                    request.Error(ErrorCategory.InvalidOperation, fastPackageReference, error.ErrorDetails.Message);
+                    request.Error("", ErrorCategory.InvalidOperation.ToString(), fastPackageReference, error.ErrorDetails.Message);
                 }
             }
             else
@@ -433,7 +435,7 @@ namespace ExeProvider
                     var exitCode = proc.ExitCode;
                     if(exitCode != 0)
                     {
-                        request.Error(ErrorCategory.InvalidOperation, fastPackageReference, string.Format("running installation package {0} failed, error detail is {1}",id, proc.StandardError.ReadToEnd()));
+                        request.Error("", ErrorCategory.InvalidOperation.ToString(), fastPackageReference, string.Format("running installation package {0} failed, error detail is {1}",id, proc.StandardError.ReadToEnd()));
                     }
                 }
             }
@@ -453,7 +455,7 @@ namespace ExeProvider
             string version;
             if (!fastPackageReference.TryParseFastPath(out source, out id, out version))
             {
-                request.Error(ErrorCategory.InvalidArgument, fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
+                request.Error(ErrorCategory.InvalidArgument.ToString(), fastPackageReference, Strings.InvalidFastPath, fastPackageReference);
             }
 
             // TODO: uninstall

@@ -18,6 +18,22 @@ namespace ExeProvider
     ""Trusted"": false,
     ""IsRegistered"": true,
     ""IsValidated"": true
+  },
+
+""Bing"": {
+    ""Name"": ""Bing"",
+    ""Location"": ""https://bing.com"",
+    ""Trusted"": false,
+    ""IsRegistered"": true,
+    ""IsValidated"": true
+  },
+
+""ProductsWeb"": {
+    ""Name"": ""ProductsWeb"",
+    ""Location"": ""http://productsweb/"",
+    ""Trusted"": false,
+    ""IsRegistered"": true,
+    ""IsValidated"": true
   }
 }";
 
@@ -34,7 +50,7 @@ namespace ExeProvider
 
             if (packageSources.ContainsKey(name))
             {
-                request.Error(ErrorCategory.ResourceExists, name, Strings.PackageSourceExists, name);
+                request.Error(ErrorCategory.ResourceExists.ToString(), name, Strings.PackageSourceExists, name);
                 return;
             }
 
@@ -48,7 +64,7 @@ namespace ExeProvider
 
             if (!packageSources.ContainsKey(name))
             {
-                request.Error(ErrorCategory.ResourceUnavailable, name, Strings.PackageSourceNotFound, name);
+                request.Error(ErrorCategory.ResourceUnavailable.ToString(), name, Strings.PackageSourceNotFound, name);
                 return;
             }
 
@@ -68,8 +84,8 @@ namespace ExeProvider
             var filePath = request.GetOptionValue("ConfigFile");
             if (String.IsNullOrEmpty(filePath))
             {
-                //otherwise, use %APPDATA%/SMART/Smart.Config
-                filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SMART", "Smart.config");
+                //otherwise, use %APPDATA%/EXE/Smart.Config
+                filePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EXE", "Smart.config");
             }
 
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));

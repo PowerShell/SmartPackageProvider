@@ -10,51 +10,63 @@ namespace ExeProvider
         {
             try
             {
-                if (request.YieldSoftwareIdentity(pkg.FastPath, pkg.Id, pkg.Version.ToString(), "semver", pkg.Summary, pkg.PackageSource.Name, searchKey, pkg.FullPath, pkg.PackageFilename))
+                if (request.YieldSoftwareIdentity(pkg.FastPath, pkg.Id, pkg.Version.ToString(), "semver", pkg.Summary, pkg.PackageSource.Name, searchKey, pkg.FullPath, pkg.PackageFilename) != null)
                 {
-                    if (!request.YieldSoftwareMetadata(pkg.FastPath, "copyright", pkg.Copyright))
+                    if (request.AddMetadata(pkg.FastPath, "FromTrustedSource", pkg.PackageSource.Trusted.ToString()) == null)
                     {
                         return false;
                     }
-                    if (!request.YieldSoftwareMetadata(pkg.FastPath, "description", pkg.Description))
+
+                    /*
+                    // AddMetadata seems to return null for good values, commenting out the below
+                    if (pkg.Copyright != null)
                     {
-                        return false;
-                    }
-                    if (!request.YieldSoftwareMetadata(pkg.FastPath, "language", pkg.Language))
-                    {
-                        return false;
-                    }
-                    if (!request.YieldSoftwareMetadata(pkg.FastPath, "tags", pkg.Tags))
-                    {
-                        return false;
-                    }
-                    if (!request.YieldSoftwareMetadata(pkg.FastPath, "title", pkg.Title))
-                    {
-                        return false;
-                    }
-                    if (
-                        !request.YieldSoftwareMetadata(pkg.FastPath, "FromTrustedSource", pkg.PackageSource.Trusted.ToString()))
-                    {
-                        return false;
-                    }
-                    if (pkg.LicenseUrl != null && !String.IsNullOrEmpty(pkg.LicenseUrl.ToString()))
-                    {
-                        if (
-                            !request.YieldLink(pkg.FastPath, pkg.LicenseUrl.ToString(), "license", null, null,
-                                null, null, null))
+                        if (request.AddMetadata(pkg.FastPath, "copyright", pkg.Copyright) != null)
                         {
                             return false;
                         }
                     }
-                    if (pkg.ProjectUrl != null && !String.IsNullOrEmpty(pkg.ProjectUrl.ToString()))
+
+                    if (pkg.Description != null)
                     {
-                        if (
-                            !request.YieldLink(pkg.FastPath, pkg.ProjectUrl.ToString(), "project", null, null,
-                                null, null, null))
+                        if (request.AddMetadata(pkg.FastPath, "description", pkg.Description) != null)
                         {
                             return false;
                         }
                     }
+
+                    if (pkg.Language != null)
+                    {
+                        if (request.AddMetadata(pkg.FastPath, "language", pkg.Language) != null)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (pkg.Tags != null)
+                    {
+                        if (request.AddMetadata(pkg.FastPath, "tags", pkg.Tags) != null)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (pkg.Title != null)
+                    {
+                        if (request.AddMetadata(pkg.FastPath, "title", pkg.Title) != null)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if (pkg.PackageSource != null)
+                    {
+                        if (request.AddMetadata(pkg.FastPath, "FromTrustedSource", pkg.PackageSource.Trusted.ToString()) != null)
+                        {
+                            return false;
+                        }
+                    }
+                    */
                 }
                 else
                 {
@@ -63,7 +75,7 @@ namespace ExeProvider
             }
             catch (NullReferenceException)
             {
-                request.Error(ErrorCategory.InvalidData, pkg.Id, Strings.PackageMissingProperty, pkg.Id);
+                request.Error("", ErrorCategory.InvalidData.ToString(), pkg.Id, Strings.PackageMissingProperty);
             }
 
             return true;
