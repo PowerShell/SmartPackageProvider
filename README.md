@@ -1,6 +1,8 @@
 # SMART & EXE Package Providers
 Microsoft Hackathon 2015 project - find, download and install applications in one line of PowerShell. Supports MSI and EXE installation.
 
+Note that this is an experimental project and is not officially supported by Microsoft. Use at your own risk - only install applications from sources you trust. Contributions are very welcome!
+
 # Usage
 ```powershell
 find-package -provider smart notepad++ | select -first 1 | install-package
